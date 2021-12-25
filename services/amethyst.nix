@@ -4,8 +4,8 @@ with lib; let
   amethystPackage = import (pkgs.fetchFromGitHub {
     owner = "an-empty-string";
     repo = "amethyst";
-    rev = "547eece285615f99b68db85e3367713133aad04d";
-    hash = "sha256-PQWSFPIpJuUbUwnF89r4p7eH758HXmlgG1PNDqngMMg=";
+    rev = "606047bd9a2c877f5eed56cca76e1d773b497543";
+    hash = "sha256-Q2PyagfCcANyofozuetsKh6qzEyWPsduPbhF3qNgj6M=";
   });
   cfg = config.services.amethyst;
 in
