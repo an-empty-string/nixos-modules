@@ -14,11 +14,12 @@
 
   services.amethyst = {
     enable = true;
-    hosts = "gemini.tris.fyi";
-
-    path."/" = {
-      root = "/var/gemini";
-      autoindex = true;
-    };
+    hosts = [
+      {
+        name = "gemini.tris.fyi";
+        autoindex = true;
+        cgi = false;
+      }
+    ];
   };
 }
