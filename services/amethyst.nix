@@ -17,6 +17,11 @@ in
     services.amethyst = {
       enable = mkEnableOption "Amethyst Gemini server";
 
+      openFirewall = mkOption {
+        default = true;
+        type = types.bool;
+      };
+
       package = mkOption {
         default = pkgs.callPackage amethystPackage { };
         type = types.package;
@@ -101,5 +106,7 @@ in
         );
       };
     };
+
+    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ 1965 ];
   };
 }
