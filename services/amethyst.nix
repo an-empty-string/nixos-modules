@@ -4,8 +4,8 @@ with lib; let
   amethystPackage = import (pkgs.fetchFromGitHub {
     owner = "an-empty-string";
     repo = "amethyst";
-    rev = "606047bd9a2c877f5eed56cca76e1d773b497543";
-    hash = "sha256-Q2PyagfCcANyofozuetsKh6qzEyWPsduPbhF3qNgj6M=";
+    rev = "643a26633a2ff079cace1745ea2564c192001c23";
+    hash = "sha256-EBXcDwIzo9gbhLIM/8GrOrFyFyit349dkvZxJ23tSZY=";
   });
   cfg = config.services.amethyst;
 in
@@ -27,71 +27,74 @@ in
         type = types.package;
       };
 
+      port = mkOption {
+        type = types.int;
+        example = literalExpression "1965";
+        default = 1965;
+        description = "The port Amethyst will listen on.";
+      };
+
       hosts = mkOption {
-        default = null;
-        type = types.nullOr types.str;
-        example = literalExpression ''"gemini.yourdomain.com otherdomain.com"'';
-        description = ''
-          A space-separated lists of hosts this server will accept requests for.
-          Requests for other hosts will be rejected.
-        '';
-      };
-
-      sslCertificatePath = mkOption {
-        default = "/var/lib/amethyst/cert.pem";
-        type = types.str;
-        description = "The path to the SSL certificate file";
-      };
-
-      sslPrivateKeyPath = mkOption {
-        default = "/var/lib/amethyst/key.pem";
-        type = types.str;
-        description = "The path to the SSL private key file";
-      };
-
-      path = mkOption {
-        type = types.attrsOf (types.submodule {
+        default = { };
+        type = types.listOf (types.submodule {
           options = {
-            root = mkOption {
-              type = types.path;
-              description = "Serve from this directory";
+            name = mkOption {
+              type = types.str;
+              description = "Name of host described by this block";
+              example = literalExpression ''"gemini.tris.fyi"'';
             };
 
-            autoindex = mkOption {
-              default = false;
-              type = types.bool;
-              description = "Enable directory listing";
+            tls = mkOption {
+              type = types.attrs;
+              example = literalExpression ''
+                {
+                  auto = false;
+                  cert_path = "/path/to/cert.pem";
+                  key_path = "/path/to/key.pem";
+                }
+              '';
+
+              default = {};
+              description = "TLS options for the host";
             };
 
-            cgi = mkOption {
-              default = false;
-              type = types.bool;
-              description = "Run files with executable bit set as CGI";
+            paths = mkOption {
+              type = types.attrs;
+              example = literalExpression ''
+                {
+                  "/" = {
+                    root = "/var/gemini";
+                    autoindex = true;
+                    cgi = false;
+                  };
+                }
+              '';
+
+              default = {
+                "/" = {
+                  root = "/var/gemini";
+                  autoindex = true;
+                  cgi = false;
+                };
+              };
+
+              description = "Path configuration for the host";
             };
           };
         });
       };
     };
   };
+
   config = mkIf cfg.enable {
-    environment.etc."amethyst.conf" = let
-      pathBlocks = (map (path: ''
-        [${path.path}]
-        root = ${path.root}
-        autoindex = ${boolToString path.autoindex}
-        cgi = ${boolToString path.cgi}
-      '') (sortProperties (mapAttrsToList (p: c: c // { path = p; }) cfg.path)));
-    in {
-      text = ''
-        [global]
-        hosts = ${cfg.hosts}
+    assertions = [
+      {
+        assertion = (length cfg.hosts) > 0;
+        message = "You must define at least one host to enable Amethyst.";
+      }
+    ];
 
-        ssl_cert = ${cfg.sslCertificatePath}
-        ssl_key = ${cfg.sslPrivateKeyPath}
-
-        ${concatStringsSep "\n\n" pathBlocks}
-      '';
-    };
+    environment.etc."amethyst.conf".text = builtins.toJSON cfg;
 
     systemd.services.amethyst = {
       description = "Amethyst Gemini server";
@@ -101,12 +104,18 @@ in
         DynamicUser = "yes";
         StateDirectory = "amethyst";
         ExecStart = "${cfg.package}/bin/amethyst /etc/amethyst.conf";
-        ReadWritePaths = sort lessThan (
-          mapAttrsToList (p: c: c.root) cfg.path
-        );
+        ReadWritePaths = sort lessThan (unique (
+          filter isString (lists.flatten (
+            map (h: (
+              mapAttrsToList
+                (p: pc: if hasAttr "root" pc then pc.root else null) h.paths
+              )
+            ) cfg.hosts
+          ))
+        ));
       };
     };
 
-    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ 1965 ];
+    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ cfg.port ];
   };
 }
