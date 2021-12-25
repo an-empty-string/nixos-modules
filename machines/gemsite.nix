@@ -17,8 +17,11 @@
     hosts = [
       {
         name = "gemini.tris.fyi";
-        autoindex = true;
-        cgi = false;
+        paths."/" = {
+          root = "/var/gemini";
+          autoindex = true;
+          cgi = false;
+        };
       }
     ];
   };
