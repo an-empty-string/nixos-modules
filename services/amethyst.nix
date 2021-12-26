@@ -1,12 +1,6 @@
 { config, lib, pkgs, ... }:
 
 with lib; let
-  amethystPackage = import (pkgs.fetchFromGitHub {
-    owner = "an-empty-string";
-    repo = "amethyst";
-    rev = "643a26633a2ff079cace1745ea2564c192001c23";
-    hash = "sha256-EBXcDwIzo9gbhLIM/8GrOrFyFyit349dkvZxJ23tSZY=";
-  });
   cfg = config.services.amethyst;
 in
 {
@@ -23,7 +17,21 @@ in
       };
 
       package = mkOption {
-        default = pkgs.callPackage amethystPackage { };
+        default = pkgs.callPackage (import (pkgs.fetchFromGitHub {
+          owner = "an-empty-string";
+          repo = "amethyst";
+          rev = "422083f373d0b9b94f8e555b7284d32b17a29cdb";
+          hash = "sha256-1usIxARLJ/pDtyPwCJx70++cdSt/YqyIiwf94RHT+ec=";
+        })) {
+          extensionPackages = [
+            pkgs.callPackage (import (pkgs.fetchFromGitHub {
+              owner = "an-empty-string";
+              repo = "amethyst_extensions";
+              rev = "62f6f8d19a3cb2c1dfa97dfa8600dacfac884224";
+              hash = "sha256-zevEa2DRAmGM7C6CYl4SymNzAX0n4k/vF00b/VFnd8w=";
+            })) {}
+          ];
+        };
         type = types.package;
       };
 

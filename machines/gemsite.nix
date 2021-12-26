@@ -22,6 +22,9 @@
           autoindex = true;
           cgi = false;
         };
+        paths."/pydoc/" = {
+          type = "pydoc";
+        };
       }
     ];
   };
