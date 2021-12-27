@@ -27,8 +27,8 @@ in
             (pkgs.callPackage (import (pkgs.fetchFromGitHub {
               owner = "an-empty-string";
               repo = "amethyst_extensions";
-              rev = "44e01342b0d904ce4b4e77ffee34e8cced122bd8";
-              hash = "sha256-vdV6hyLN3l1xHTTq9w/ISqUKYZnSoX18hMlDR00ReEo=";
+              rev = "4f8fc0c0be33216d5dbef5cb4b6598b01a1d0a82";
+              hash = "sha256-xfXNyiH331fk6l52HtrsZ/rrAykOVY1aj2wC/vCPsNU=";
             })) {})
           ];
         };
