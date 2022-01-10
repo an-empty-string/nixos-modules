@@ -20,8 +20,8 @@ in
         default = pkgs.callPackage (import (pkgs.fetchFromGitHub {
           owner = "an-empty-string";
           repo = "amethyst";
-          rev = "0c1947d3efcf65de1ada54ad200d855d6ab2ae11";
-          hash = "sha256-fDwzYlVzXQa9FaVCcApVmtMf4opaNxA1HFCsvP8Rs+k=";
+          rev = "7dc3c32edd312ee7f03e622077b0fe0493cc8409";
+          hash = "sha256-rki/JUWMT6CVohs9QwU8GEn3S9Ph/0AQyjFYQ2nQbLg=";
         })) {
           extensionPackages = [
             (pkgs.callPackage (import (pkgs.fetchFromGitHub {
